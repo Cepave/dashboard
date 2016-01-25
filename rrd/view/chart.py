@@ -379,6 +379,14 @@ def charts():
         abort(400, "no endpoints of %s" %g.id)
     endpoints = sorted(set(endpoints))
 
+    group_objs = Group.gets_by_group(endpoints)
+    group_ids = [x.id for x in group_objs]
+    grouphost_objs = GroupHost.search(group_ids)
+    endpoint_ids = [x.hostId for x in grouphost_objs]
+    qs = []
+    endpoint_objs = Endpoint.search_in_ids(qs, endpoint_ids)
+    endpoint_names = [x.endpoint for x in endpoint_objs]
+
     chart_urls = []
     chart_ids = []
     p = {
@@ -393,7 +401,6 @@ def charts():
     }
 
     if g.graph_type == GRAPH_TYPE_KEY:
-
         for x in endpoints:
             id_ = TmpGraph.add([x], counters)
             if not id_:
