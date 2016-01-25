@@ -1,34 +1,64 @@
+
 function fn_list_endpoints()
 {
+    var group = $.trim($("input[name='hostgroup_search']").val());
     var qs = $.trim($("input[name='endpoint_search']").val());
-    var tags = $.trim($("input[name='tag_search']").val());
-    var limit = $("#endpoint-limit").val();
+    if (group.length > 0 && qs.length > 0) {
+        alert('Hostgroup 與 Endpoint 只能選一個');
+    } else if (group.length > 0) {
+        $(".loading").show();
+        $.getJSON("/api/groups", {q: group}, function(ret){
+                    $(".loading").hide();
+                    if (!ret.ok) {
+                        alert(ret.msg);
+                        return;
+                    }
+                    var hosts = ret.data;
 
-    $(".loading").show();
-    $.getJSON("/api/endpoints", {q: qs, tags: tags, limit:limit, _r:Math.random()}, function(ret){
-                $(".loading").hide();
-                if (!ret.ok) {
-                    alert(ret.msg);
-                    return;
-                }
-                var hosts = ret.data;
+                    var tbody_hosts = $("#tbody-endpoints");
+                    tbody_hosts.html("");
+                    for (var hidx in hosts) {
+                        var h = hosts[hidx];
+                        var line_html = '<tr>'
+                        + '<td><input type="checkbox" data-fullname="'+ h +'"></input></td>'
+                        + '<td>' + h + '</td>'
+                        + '</tr>';
+                        tbody_hosts.append($(line_html));
+                    }
+                    fn_check_all_hosts();
+        }).error(function(req, ret, errorThrown){
+            $(".loading").hide();
+            alert(req.statusText)
+        })
+    } else if (qs.length > 0) {
+        var tags = $.trim($("input[name='tag_search']").val());
+        var limit = $("#endpoint-limit").val();
+        $(".loading").show();
+        $.getJSON("/api/endpoints", {q: qs, tags: tags, limit:limit, _r:Math.random()}, function(ret){
+                    $(".loading").hide();
+                    if (!ret.ok) {
+                        alert(ret.msg);
+                        return;
+                    }
+                    var hosts = ret.data;
 
-                // display_endpoints
-                var tbody_hosts = $("#tbody-endpoints");
-                tbody_hosts.html("");
-                for (var hidx in hosts) {
-                    var h = hosts[hidx];
-                    var line_html = '<tr>'
-                    + '<td><input type="checkbox" data-fullname="'+ h +'"></input></td>'
-                    + '<td>' + h + '</td>'
-                    + '</tr>';
-                    tbody_hosts.append($(line_html));
-                }
-                fn_check_all_hosts();
-    }).error(function(req, ret, errorThrown){
-        $(".loading").hide();
-        alert(req.statusText)
-    })
+                    // display_endpoints
+                    var tbody_hosts = $("#tbody-endpoints");
+                    tbody_hosts.html("");
+                    for (var hidx in hosts) {
+                        var h = hosts[hidx];
+                        var line_html = '<tr>'
+                        + '<td><input type="checkbox" data-fullname="'+ h +'"></input></td>'
+                        + '<td>' + h + '</td>'
+                        + '</tr>';
+                        tbody_hosts.append($(line_html));
+                    }
+                    fn_check_all_hosts();
+        }).error(function(req, ret, errorThrown){
+            $(".loading").hide();
+            alert(req.statusText)
+        })
+    }
 }
 
 function fn_list_counters(){
