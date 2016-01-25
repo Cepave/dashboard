@@ -13,7 +13,11 @@ from MySQLdb import ProgrammingError
 
 from rrd import app
 from rrd.consts import RRD_CFS, GRAPH_TYPE_KEY, GRAPH_TYPE_HOST
+from rrd.model.endpoint import Endpoint
 from rrd.model.graph import TmpGraph
+from rrd.model.group import Group
+from rrd.model.group_host import GroupHost
+from rrd.model.host import Host
 from rrd.utils.rrdgraph import merge_list
 from rrd.utils.rrdgraph import graph_query
 
@@ -74,8 +78,18 @@ def chart():
     endpoints = request.form.getlist("endpoints[]") or []
     counters = request.form.getlist("counters[]") or []
     graph_type = request.form.get("graph_type") or GRAPH_TYPE_HOST
+    endpoints = sorted(set(endpoints))
 
-    id_ = TmpGraph.add(endpoints, counters)
+    group_objs = Group.gets_by_group(endpoints)
+    if len(group_objs) > 0:
+        group_ids = [x.id for x in group_objs]
+        grouphost_objs = GroupHost.search(group_ids)
+        host_ids = [x.hostId for x in grouphost_objs]
+        host_objs = Host.search(host_ids)
+        endpoint_names = [x.name for x in host_objs]
+        id_ = TmpGraph.add(endpoint_names, counters)
+    else:
+        id_ = TmpGraph.add(endpoints, counters)
 
     ret = {
             "ok": False,
@@ -365,6 +379,14 @@ def charts():
         abort(400, "no endpoints of %s" %g.id)
     endpoints = sorted(set(endpoints))
 
+    group_objs = Group.gets_by_group(endpoints)
+    group_ids = [x.id for x in group_objs]
+    grouphost_objs = GroupHost.search(group_ids)
+    endpoint_ids = [x.hostId for x in grouphost_objs]
+    qs = []
+    endpoint_objs = Endpoint.search_in_ids(qs, endpoint_ids)
+    endpoint_names = [x.endpoint for x in endpoint_objs]
+
     chart_urls = []
     chart_ids = []
     p = {
@@ -379,7 +401,6 @@ def charts():
     }
 
     if g.graph_type == GRAPH_TYPE_KEY:
-
         for x in endpoints:
             id_ = TmpGraph.add([x], counters)
             if not id_:
@@ -407,4 +428,3 @@ def charts():
             chart_urls.append(src)
 
     return render_template("chart/multi_ng.html", **locals())
-

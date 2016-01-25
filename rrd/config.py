@@ -16,6 +16,13 @@ GRAPH_DB_USER = "root"
 GRAPH_DB_PASSWD = ""
 GRAPH_DB_NAME = "graph"
 
+#-- portal db config --
+PORTAL_DB_HOST = "127.0.0.1"
+PORTAL_DB_PORT = 3306
+PORTAL_DB_USER = "root"
+PORTAL_DB_PASSWD = ""
+PORTAL_DB_NAME = "falcon_portal"
+
 #-- app config --
 DEBUG = True
 SECRET_KEY = "secret-key"
