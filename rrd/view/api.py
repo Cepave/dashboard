@@ -44,6 +44,7 @@ def api_groups():
 
     return json.dumps(ret)
 
+
 @app.route("/api/endpoints")
 def api_endpoints():
     ret = {
@@ -101,12 +102,25 @@ def api_get_counters():
 
     endpoint_objs = Endpoint.gets_by_endpoint(endpoints)
     endpoint_ids = [x.id for x in endpoint_objs]
+    group_ids = []
     if not endpoint_ids:
-        ret['msg'] = "no endpoints in graph"
-        return json.dumps(ret)
+        group_objs = Group.gets_by_group(endpoints)
+        group_ids = [x.id for x in group_objs]
+        grouphost_objs = GroupHost.search(group_ids)
+        host_ids = [x.hostId for x in grouphost_objs]
+        host_objs = Host.search(host_ids)
+        host_names = [x.name for x in host_objs]
+        endpoint_objs = Endpoint.gets_by_endpoint(host_names)
+        endpoint_ids = [x.id for x in endpoint_objs]
 
-    if q:
-        qs = q.split()
+        if not endpoint_ids:
+            ret['msg'] = "no endpoints in graph"
+            return json.dumps(ret)
+
+    qs = q.split()
+    if len(group_ids) > 0:
+        limit = 5000
+    if len(qs) > 0:
         ecs = EndpointCounter.search_in_endpoint_ids(qs, endpoint_ids, limit=limit)
     else:
         ecs = EndpointCounter.gets_by_endpoint_ids(endpoint_ids, limit=limit)
