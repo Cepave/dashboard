@@ -63,7 +63,7 @@ function fn_list_endpoints()
 function fn_list_counters(nethelp){
     var qs = $.trim($("#counter-search").val());
     if(nethelp){
-        qs = "net.if.in net.if.out";
+        qs = "net.if.in.bits net.if.out.bits";
     }
     var hosts = new Array();
     $("#tbody-endpoints input:checked").each(function(i, o){
