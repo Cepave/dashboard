@@ -15,7 +15,7 @@ def connect_db(host, port, user, password, db):
         conn.autocommit(True)
         return conn
     except Exception, e:
-        print "Fatal: connect db fail:%s" % e
+        print 'level=fatal msg="connect db fail:%s"' % e
         return None
 
 class DB(object):

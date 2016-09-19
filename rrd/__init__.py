@@ -54,7 +54,7 @@ API_PATHS = ['/api', '/chart']
 
 @app.errorhandler(Exception)
 def all_exception_handler(error):
-    print "exception: %s" %error
+    print 'msg="exception: %s"' % error
     resp = {
              "status": "failed",
              "msg": u'dashboard got some problem now, please contact your system admin.'
