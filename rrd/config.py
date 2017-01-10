@@ -1,60 +1,70 @@
-#-*-coding:utf8-*-
-import os
-import json
+# -*-coding:utf8-*-
 
-#-- dashboard db config --
-DASHBOARD_DB_HOST = "127.0.0.1"
-DASHBOARD_DB_PORT = 3306
-DASHBOARD_DB_USER = "root"
-DASHBOARD_DB_PASSWD = ""
-DASHBOARD_DB_NAME = "dashboard"
+from __future__ import absolute_import
 
-#-- graph db config --
-GRAPH_DB_HOST = "127.0.0.1"
-GRAPH_DB_PORT = 3306
-GRAPH_DB_USER = "root"
-GRAPH_DB_PASSWD = ""
-GRAPH_DB_NAME = "graph"
+from decouple import config
 
-#-- portal db config --
-PORTAL_DB_HOST = "127.0.0.1"
-PORTAL_DB_PORT = 3306
-PORTAL_DB_USER = "root"
-PORTAL_DB_PASSWD = ""
-PORTAL_DB_NAME = "falcon_portal"
 
-#-- app config --
-DEBUG = True
-SECRET_KEY = "secret-key"
-SESSION_COOKIE_NAME = "open-falcon"
-PERMANENT_SESSION_LIFETIME = 3600 * 24 * 30
+# -- dashboard db config --
+DASHBOARD_DB_HOST = config('FALCON_DASHBOARD_DB_HOST', default="127.0.0.1")
+DASHBOARD_DB_PORT = config('FALCON_DASHBOARD_DB_PORT', default=3306, cast=int)
+DASHBOARD_DB_USER = config('FALCON_DASHBOARD_DB_USER', default="root")
+DASHBOARD_DB_PASS = config('FALCON_DASHBOARD_DB_PASS', default="password")
+DASHBOARD_DB_NAME = config('FALCON_DASHBOARD_DB_NAME', default="dashboard")
+
+# -- graph db config --
+GRAPH_DB_HOST = config('FALCON_GRAPH_DB_HOST', default="127.0.0.1")
+GRAPH_DB_PORT = config('FALCON_GRAPH_DB_PORT', default=3306, cast=int)
+GRAPH_DB_USER = config('FALCON_GRAPH_DB_USER', default="root")
+GRAPH_DB_PASS = config('FALCON_GRAPH_DB_PASS', default="password")
+GRAPH_DB_NAME = config('FALCON_GRAPH_DB_NAME', default="graph")
+
+# -- portal db config --
+PORTAL_DB_HOST = config('FALCON_PORTAL_DB_HOST', default="127.0.0.1")
+PORTAL_DB_PORT = config('FALCON_PORTAL_DB_PORT', default=3306, cast=int)
+PORTAL_DB_USER = config('FALCON_PORTAL_DB_USER', default="root")
+PORTAL_DB_PASS = config('FALCON_PORTAL_DB_PASS', default="password")
+PORTAL_DB_NAME = config('FALCON_PORTAL_DB_NAME', default="falcon_portal")
+
+# -- uic db config --
+UIC_DB_HOST = config('FALCON_UIC_DB_HOST', default="127.0.0.1")
+UIC_DB_PORT = config('FALCON_UIC_DB_PORT', default=3306, cast=int)
+UIC_DB_USER = config('FALCON_UIC_DB_USER', default="root")
+UIC_DB_PASS = config('FALCON_UIC_DB_PASS', default="password")
+UIC_DB_NAME = config('FALCON_UIC_DB_NAME', default="uic")
+UIC_DB_TABLE_SESSION = 'session'
+
+# -- app config --
+DEBUG = config('FALCON_DEBUG', default=False, cast=bool)
+SECRET_KEY = config('FALCON_SECRET_KEY', default="4e.5tyg8-u9ioj")
+SESSION_COOKIE_NAME = config('FALCON_SESSION_COOKIE_NAME', default="falcon-portal")
+SESSION_COOKIE_DOMAIN = config('FALCON_SESSION_COOKIE_DOMAIN', default=None)
 SITE_COOKIE = "open-falcon-ck"
 
-#-- query config --
-QUERY_ADDR = "http://127.0.0.1:9966"
+URL_PORTAL = config('FALCON_URL_PORTAL', default="http://127.0.0.1:5050")
+URL_DARSHBOARD = config('FALCON_URL_DARSHBOARD', default="http://127.0.0.1:8081")
+URL_GRAFANA = config('FALCON_URL_GRAFANA', default="http://127.0.0.1:3000")
+URL_ALARM = config('FALCON_URL_ALARM', default="http://127.0.0.1:9912")
+URL_UIC = config('FALCON_URL_UIC', default="http://127.0.0.1:1234")
+URL_QUERY = config('FALCON_URL_QUERY', default="http://127.0.0.1:9966")
 
-BASE_DIR = "/home/work/open-falcon/dashboard/"
-LOG_PATH = os.path.join(BASE_DIR,"log/")
+# -- query config --
+QUERY_ADDR = URL_QUERY
+
+LOG_PATH = config('FALCON_LOG_DIR', default="/var/log/falcon-dashboard")
 
 JSONCFG = {}
-JSONCFG['database'] = {}
-JSONCFG['database']['host']     = '127.0.0.1'
-JSONCFG['database']['port']     = '3306'
-JSONCFG['database']['account']  = 'root'
-JSONCFG['database']['password'] = 'password'
-JSONCFG['database']['db']       = 'uic'
-JSONCFG['database']['table']    = 'session'
 
 JSONCFG['shortcut'] = {}
-JSONCFG['shortcut']['falconPortal']     = "http://127.0.0.1:5050"
-JSONCFG['shortcut']['falconDashboard']  = "http://127.0.0.1:8081"
-JSONCFG['shortcut']['grafanaDashboard'] = "http://127.0.0.1:3000"
-JSONCFG['shortcut']['falconAlarm']      = "http://127.0.0.1:9912"
-JSONCFG['shortcut']['falconUIC']        = "http://127.0.0.1:1234"
+JSONCFG['shortcut']['falconPortal'] = URL_PORTAL
+JSONCFG['shortcut']['falconDashboard'] = URL_DARSHBOARD
+JSONCFG['shortcut']['grafanaDashboard'] = URL_GRAFANA
+JSONCFG['shortcut']['falconAlarm'] = URL_ALARM
+JSONCFG['shortcut']['falconUIC'] = URL_UIC
 
-JSONCFG['redirectUrl'] = 'UrlOfRedirectedLoginPage'
+JSONCFG['redirectUrl'] = '{}/auth/login?callback={}'.format(URL_UIC, URL_PORTAL)
 
 try:
-    from rrd.local_config import *
+    from .local_config import *
 except:
     pass
