@@ -10,6 +10,12 @@ import time
 from contextlib import closing
 import json
 from . import config
+import logging
+
+
+logger = logging.getLogger(__name__)
+if config.DEBUG:
+    logging.basicConfig(level=logging.DEBUG)
 
 
 def queryDB(sig):
@@ -76,10 +82,14 @@ def before_request():
     sig = request.cookies.get('sig')
     url = config.JSONCFG['redirectUrl']
     if not sig:
+        logger.info(
+            'sig is missing in request.cookies from %s' %
+            request.remote_addr)
         return redirect(url, code=302)
 
     rows = queryDB(sig)
     if rows is None or len(rows) == 0:
+        logger.info('sig: %s not found' % sig)
         return redirect(url, code=302)
 
     row = rows[0]
@@ -87,4 +97,7 @@ def before_request():
     now = int(time.time())
     expired = now > expiredTime
     if expired:
+        logger.warning('sig: %s is expired' % sig)
         return redirect(url, code=302)
+
+    logger.debug('signed OK')

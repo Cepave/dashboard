@@ -42,7 +42,7 @@ SESSION_COOKIE_DOMAIN = config('FALCON_SESSION_COOKIE_DOMAIN', default=None)
 SITE_COOKIE = "open-falcon-ck"
 
 URL_PORTAL = config('FALCON_URL_PORTAL', default="http://127.0.0.1:5050")
-URL_DARSHBOARD = config('FALCON_URL_DARSHBOARD', default="http://127.0.0.1:8081")
+URL_DASHBOARD = config('FALCON_URL_DASHBOARD', default="http://127.0.0.1:8081")
 URL_GRAFANA = config('FALCON_URL_GRAFANA', default="http://127.0.0.1:3000")
 URL_ALARM = config('FALCON_URL_ALARM', default="http://127.0.0.1:9912")
 URL_UIC = config('FALCON_URL_UIC', default="http://127.0.0.1:1234")
@@ -57,12 +57,12 @@ JSONCFG = {}
 
 JSONCFG['shortcut'] = {}
 JSONCFG['shortcut']['falconPortal'] = URL_PORTAL
-JSONCFG['shortcut']['falconDashboard'] = URL_DARSHBOARD
+JSONCFG['shortcut']['falconDashboard'] = URL_DASHBOARD
 JSONCFG['shortcut']['grafanaDashboard'] = URL_GRAFANA
 JSONCFG['shortcut']['falconAlarm'] = URL_ALARM
 JSONCFG['shortcut']['falconUIC'] = URL_UIC
 
-JSONCFG['redirectUrl'] = '{}/auth/login?callback={}'.format(URL_UIC, URL_PORTAL)
+JSONCFG['redirectUrl'] = '{}/auth/login?callback={}'.format(URL_UIC, URL_DASHBOARD)
 
 try:
     from .local_config import *
