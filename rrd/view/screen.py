@@ -1,27 +1,25 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 import json
-import copy
-import requests
-import json
-from flask import render_template, abort, request, url_for, redirect, g
-import time
-import datetime
 
-from rrd import app
+from flask import Blueprint, render_template, abort, request, redirect, g
+
 from rrd.model.screen import DashboardScreen
 from rrd.model.graph import DashboardGraph
-from rrd import consts
-from rrd.utils.graph_urls import generate_graph_urls 
+
+from rrd.utils.graph_urls import generate_graph_urls
 from rrd import config
 
-@app.route("/screen", methods=["GET", "POST"])
+bp = Blueprint('screen', __name__)
+
+
+@bp.route("/screen", methods=["GET", "POST"])
 def dash_screens():
     top_screens = DashboardScreen.gets(pid='0')
     top_screens = sorted(top_screens, key=lambda x:x.name)
 
     return render_template("screen/index.html", config=config, **locals())
 
-@app.route("/screen/<int:sid>/delete")
+@bp.route("/screen/<int:sid>/delete")
 def dash_screen_delete(sid):
     screen = DashboardScreen.get(sid)
     if not screen:
@@ -30,7 +28,7 @@ def dash_screen_delete(sid):
 
     return redirect("/screen")
 
-@app.route("/screen/<int:sid>/edit", methods=["GET", "POST"])
+@bp.route("/screen/<int:sid>/edit", methods=["GET", "POST"])
 def dash_screen_edit(sid):
     screen = DashboardScreen.get(sid)
     if not screen:
@@ -43,7 +41,7 @@ def dash_screen_edit(sid):
     else:
         return render_template("screen/edit.html", config=config, **locals())
 
-@app.route("/screen/<int:sid>/clone", methods=["GET", "POST"])
+@bp.route("/screen/<int:sid>/clone", methods=["GET", "POST"])
 def dash_screen_clone(sid):
     screen = DashboardScreen.get(sid)
     if not screen:
@@ -67,7 +65,7 @@ def dash_screen_clone(sid):
     else:
         return render_template("screen/clone.html", config=config, **locals())
 
-@app.route("/graph/<int:gid>/delete")
+@bp.route("/graph/<int:gid>/delete")
 def dash_graph_delete(gid):
     graph = DashboardGraph.get(gid)
     if not graph:
@@ -75,7 +73,7 @@ def dash_graph_delete(gid):
     DashboardGraph.remove(gid)
     return redirect("/screen/" + graph.screen_id)
 
-@app.route("/screen/<int:sid>")
+@bp.route("/screen/<int:sid>")
 def dash_screen(sid):
     start = request.args.get("start")
     end = request.args.get("end")
@@ -106,7 +104,7 @@ def dash_screen(sid):
 
     return render_template("screen/screen.html", config=config, **locals())
 
-@app.route("/screen/embed/<int:sid>")
+@bp.route("/screen/embed/<int:sid>")
 def dash_screen_embed(sid):
     start = request.args.get("start")
     end = request.args.get("end")
@@ -129,7 +127,7 @@ def dash_screen_embed(sid):
     return render_template("screen/screen_embed.html", config=config, **locals())
 
 
-@app.route("/screen/add", methods=["GET", "POST"])
+@bp.route("/screen/add", methods=["GET", "POST"])
 def dash_screen_add():
     if request.method == "POST":
         name = request.form.get("screen_name")
@@ -141,7 +139,7 @@ def dash_screen_add():
         screen = DashboardScreen.get(pid)
         return render_template("screen/add.html", config=config, **locals())
 
-@app.route("/screen/<int:sid>/graph", methods=["GET", "POST"])
+@bp.route("/screen/<int:sid>/graph", methods=["GET", "POST"])
 def dash_graph_add(sid):
     all_screens = DashboardScreen.gets()
     top_screens = [x for x in all_screens if x.pid == '0']
@@ -179,7 +177,7 @@ def dash_graph_add(sid):
         graph = gid and DashboardGraph.get(gid)
         return render_template("screen/graph_add.html", config=config, **locals())
 
-@app.route("/graph/<int:gid>/edit", methods=["GET", "POST"])
+@bp.route("/graph/<int:gid>/edit", methods=["GET", "POST"])
 def dash_graph_edit(gid):
     error = ""
     graph = DashboardGraph.get(gid)
@@ -228,7 +226,7 @@ def dash_graph_edit(gid):
         ajax = request.args.get("ajax", "")
         return render_template("screen/graph_edit.html", config=config, **locals())
 
-@app.route("/graph/multi_edit", methods=["GET", "POST"])
+@bp.route("/graph/multi_edit", methods=["GET", "POST"])
 def dash_graph_multi_edit():
     ret = {
             "ok": False,
@@ -250,21 +248,21 @@ def dash_graph_multi_edit():
         rows = []
         for x in jdata:
             rows.append({"id": x["id"], "hosts": x["endpoints"], "counters": x["counters"]})
-        DashboardGraph.update_multi(rows) 
+        DashboardGraph.update_multi(rows)
 
         return json.dumps({
              "ok": True,
              "msg": "",
         })
-        
+
     elif request.method == "GET":
         sid = request.args.get("sid")
         if not sid or not DashboardScreen.get(sid):
             ret["msg"] = "no_screen"
             return json.dumps(ret)
-        
+
         ret["ok"] = True
         graphs = DashboardGraph.gets_by_screen_id(sid)
         ret['data'] = [{"id": x.id, "title": x.title, "endpoints":x.hosts, "counters":x.counters} for x in graphs]
         return json.dumps(ret)
-    
+

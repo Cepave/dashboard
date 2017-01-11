@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+from werkzeug.utils import import_string
 from flask import Flask
 from flask import request
 from flask import redirect
@@ -58,6 +59,14 @@ def queryDB(sig):
     return rows
 
 
+blueprints = [
+    'rrd.view.index:bp',
+    'rrd.view.api:bp',
+    'rrd.view.chart:bp',
+    'rrd.view.screen:bp',
+]
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(config)
@@ -73,6 +82,10 @@ def create_app():
             "msg": u'dashboard got some problem now, please contact your system admin.'
         }
         return json.dumps(resp), 500
+
+    # from .view import api, chart, screen, index
+    for bp in map(import_string, blueprints):
+        app.register_blueprint(bp)
 
     @app.before_request
     def before_request():
