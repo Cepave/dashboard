@@ -32,14 +32,19 @@ dashboard是提供给用户，以图表的方式查看push上来的数据
 
 ## Start
 
-    $ ./env/bin/python wsgi.py
+    $ cp .env.example .env
+
+    $ . env/bin/activate
+    $ env `cat .env | xargs` python wsgi.py
 
     --> goto http://127.0.0.1:8081
 
 
 ## Run with gunicorn
 
-    $ bash control start
+    $ . env/bin/activate
+    $ env `cat .env 2>/dev/null | xargs` gunicorn -c gunicorn.conf wsgi:app
+    $ Or: env `cat .env 2>/dev/null | xargs` bash ./control start
 
     --> goto http://127.0.0.1:8081
 
