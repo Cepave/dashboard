@@ -36,6 +36,7 @@ UIC_DB_TABLE_SESSION = 'session'
 
 # -- app config --
 DEBUG = config('FALCON_DEBUG', default=False, cast=bool)
+SENTRY_DSN = config('FALCON_SENTRY_DSN', default='')
 SECRET_KEY = config('FALCON_SECRET_KEY', default="4e.5tyg8-u9ioj")
 SESSION_COOKIE_NAME = config('FALCON_SESSION_COOKIE_NAME', default="falcon-portal")
 SESSION_COOKIE_DOMAIN = config('FALCON_SESSION_COOKIE_DOMAIN', default=None)
