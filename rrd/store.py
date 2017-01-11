@@ -66,19 +66,19 @@ dashboard_db_conn = DB(
         config.DASHBOARD_DB_HOST,
         config.DASHBOARD_DB_PORT,
         config.DASHBOARD_DB_USER,
-        config.DASHBOARD_DB_PASSWD,
+        config.DASHBOARD_DB_PASS,
         config.DASHBOARD_DB_NAME)
 
 graph_db_conn = DB(
         config.GRAPH_DB_HOST,
         config.GRAPH_DB_PORT,
         config.GRAPH_DB_USER,
-        config.GRAPH_DB_PASSWD,
+        config.GRAPH_DB_PASS,
         config.GRAPH_DB_NAME)
 
 portal_db_conn = DB(
         config.PORTAL_DB_HOST,
         config.PORTAL_DB_PORT,
         config.PORTAL_DB_USER,
-        config.PORTAL_DB_PASSWD,
+        config.PORTAL_DB_PASS,
         config.PORTAL_DB_NAME)

@@ -1,7 +1,10 @@
-#-*- coding:utf-8 -*-
-from flask import render_template
-from rrd import app
+# -*- coding:utf-8 -*-
+from flask import Blueprint, render_template
 
-@app.route("/")
+
+bp = Blueprint('index', __name__)
+
+
+@bp.route("/")
 def index():
     return render_template("index.html", **locals())

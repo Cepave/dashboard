@@ -1,7 +1,7 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 import json
-from flask import request, abort, g
-from rrd import app
+from flask import Blueprint, request
+
 from rrd.store import dashboard_db_conn as db_con
 from rrd.model.endpoint import Endpoint
 from rrd.model.endpoint_counter import EndpointCounter
@@ -11,8 +11,10 @@ from rrd.model.group_host import GroupHost
 from rrd.model.host import Host
 from rrd.model.tag_endpoint import TagEndpoint
 
+bp = Blueprint('api', __name__)
 
-@app.route("/api/health")
+
+@bp.route("/api/health")
 def health_check():
     resp = {
         "status": "ok",
@@ -39,7 +41,7 @@ def health_check():
 * @called by:       function fn_list_endpoints()
 *                    in rrd/static/js/xperf.js
 """
-@app.route("/api/groups")
+@bp.route("/api/groups")
 def api_groups():
     ret = {
         "ok": False,
@@ -61,7 +63,7 @@ def api_groups():
     return json.dumps(ret)
 
 
-@app.route("/api/endpoints")
+@bp.route("/api/endpoints")
 def api_endpoints():
     ret = {
         "ok": False,
@@ -78,7 +80,7 @@ def api_endpoints():
     if not q and not tags:
         ret["msg"] = "no query params given"
         return json.dumps(ret)
-    
+
     endpoints = []
 
     if tags and q:
@@ -100,7 +102,7 @@ def api_endpoints():
     return json.dumps(ret)
 
 
-@app.route("/api/counters", methods=["POST"])
+@bp.route("/api/counters", methods=["POST"])
 def api_get_counters():
     ret = {
         "ok": False,
@@ -147,7 +149,7 @@ def api_get_counters():
     if not ecs:
         ret["msg"] = "no counters in graph"
         return json.dumps(ret)
-    
+
     counters_map = {}
     for x in ecs:
         counters_map[x.counter] = [x.counter, x.type_, x.step]
@@ -159,7 +161,7 @@ def api_get_counters():
 
     return json.dumps(ret)
 
-@app.route("/api/tmpgraph", methods=["POST",])
+@bp.route("/api/tmpgraph", methods=["POST",])
 def api_create_tmpgraph():
     d = request.data
     jdata = json.loads(d)

@@ -1,17 +1,13 @@
-#-*- coding:utf-8 -*-
-import os
+# -*- coding:utf-8 -*-
+
 import time
-import datetime
-import socket
-import hashlib
-import random
+
 import urllib
 import json
-import random
-from flask import request, g, abort, render_template
+
+from flask import Blueprint, request, g, abort, render_template
 from MySQLdb import ProgrammingError
 
-from rrd import app
 from rrd.consts import RRD_CFS, GRAPH_TYPE_KEY, GRAPH_TYPE_HOST
 from rrd.model.endpoint import Endpoint
 from rrd.model.graph import TmpGraph
@@ -21,7 +17,10 @@ from rrd.model.host import Host
 from rrd.utils.rrdgraph import merge_list
 from rrd.utils.rrdgraph import graph_query
 
-@app.teardown_request
+bp = Blueprint('chart', __name__)
+
+
+@bp.teardown_app_request
 def teardown_request(exception):
     from rrd.store import dashboard_db_conn as db_conn
     try:
@@ -34,8 +33,8 @@ def teardown_request(exception):
         graph_db_conn and graph_db_conn.commit()
     except ProgrammingError:
         pass
-#
-@app.before_request
+
+@bp.before_request
 def chart_before():
     if request.method == "GET":
         now = int(time.time())
@@ -73,7 +72,7 @@ def chart_before():
         g.limit = int(request.args.get("limit") or 0)
         g.page = int(request.args.get("page") or 0)
 
-@app.route("/chart", methods=["POST",])
+@bp.route("/chart", methods=["POST",])
 def chart():
     endpoints = request.form.getlist("endpoints[]") or []
     counters = request.form.getlist("counters[]") or []
@@ -103,11 +102,11 @@ def chart():
 
     return json.dumps(ret)
 
-@app.route("/chart/big", methods=["GET",])
+@bp.route("/chart/big", methods=["GET",])
 def chart_big():
     return render_template("chart/big_ng.html", **locals())
 
-@app.route("/chart/embed", methods=["GET",])
+@bp.route("/chart/embed", methods=["GET",])
 def chart_embed():
     w = request.args.get("w")
     w = int(w) if w else 600
@@ -115,7 +114,7 @@ def chart_embed():
     h = int(h) if h else 200
     return render_template("chart/embed.html", **locals())
 
-@app.route("/chart/h", methods=["GET"])
+@bp.route("/chart/h", methods=["GET"])
 def multi_endpoints_chart_data():
     if not g.id:
         abort(400, "no graph id given")
@@ -197,7 +196,7 @@ def multi_endpoints_chart_data():
 
     return json.dumps(ret)
 
-@app.route("/chart/k", methods=["GET"])
+@bp.route("/chart/k", methods=["GET"])
 def multi_counters_chart_data():
     if not g.id:
         abort(400, "no graph id given")
@@ -279,7 +278,7 @@ def multi_counters_chart_data():
 
     return json.dumps(ret)
 
-@app.route("/chart/a", methods=["GET"])
+@bp.route("/chart/a", methods=["GET"])
 def multi_chart_data():
     if not g.id:
         abort(400, "no graph id given")
@@ -360,7 +359,7 @@ def multi_chart_data():
 
     return json.dumps(ret)
 
-@app.route("/charts", methods=["GET"])
+@bp.route("/charts", methods=["GET"])
 def charts():
     if not g.id:
         abort(400, "no graph id given")
